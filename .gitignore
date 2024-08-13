@@ -1,0 +1,6 @@
+/node_modules
+
+/.idea
+/indices/*
+!/indices/.gitkeep
+/tests/largeTestingFile.txt
