@@ -19,6 +19,8 @@ export class LineSearch {
       return;
     }
 
+    console.log('Indexing file...');
+
     const readStream = readline.createInterface({
       input: createReadStream(this.filePath),
     });
@@ -39,12 +41,13 @@ export class LineSearch {
       readStream.on('close', () => lineDbStream.end());
 
       lineDbStream.on('end', () => {
+        console.log('Indexing finished');
         resolve();
       });
     });
   }
 
-  async search(line: number) {
+  async search(line: number): Promise<string | null> {
     const positionOfLine = await this.lineDB.search(line);
     if (positionOfLine === null) {
       return null;

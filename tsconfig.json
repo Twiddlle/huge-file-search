@@ -22,5 +22,6 @@
     "strictPropertyInitialization": true,
     "allowUnusedLabels": false,
     "resolveJsonModule": true
-  }
+  },
+  "include": ["cli.ts"]
 }
