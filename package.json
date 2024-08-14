@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "line": "ts-node cli.ts"
+    "line": "ts-node cli.ts",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
