@@ -35,8 +35,10 @@ export class LineDB {
     });
   }
 
-  pipe() {
-    const writeStream = createWriteStream(this.filename);
+  createWriteStreamToIndex() {
+    const writeStream = createWriteStream(this.filename, {
+      highWaterMark: 256 * 1024,
+    });
 
     const transformToIndex = new Transform({
       transform(chunk, encoding, done) {

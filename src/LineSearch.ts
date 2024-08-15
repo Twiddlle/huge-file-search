@@ -22,20 +22,24 @@ export class LineSearch {
     console.log('Indexing file...');
 
     const readStream = readline.createInterface({
-      input: createReadStream(this.filePath),
+      input: createReadStream(this.filePath, {
+        highWaterMark: 256 * 1024,
+      }),
     });
 
-    const lineDbStream = this.lineDB.pipe();
+    const lineDbStream = this.lineDB.createWriteStreamToIndex();
 
     return new Promise<void>((resolve, reject) => {
       let lineCount = 1;
       let filePosition = 0;
       readStream.on('line', (line) => {
-        if (line !== '') {
-          lineDbStream.write(Buffer.from(`${filePosition}`));
-          filePosition += line.length + 1; // +1 for new line character
-          lineCount++;
+        if (lineCount % 1000000 === 0) {
+          console.log(`Indexed ${lineCount} lines`);
         }
+
+        lineDbStream.write(Buffer.from(`${filePosition}`));
+        filePosition += line.length + 1; // +1 for new line character
+        lineCount++;
       });
       readStream.on('error', (error) => reject(error));
       readStream.on('close', () => lineDbStream.end());

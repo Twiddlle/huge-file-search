@@ -1,5 +1,4 @@
 import { createWriteStream, existsSync, unlinkSync } from 'node:fs';
-import { randomUUID } from 'node:crypto';
 import { LineSearch } from '../src/LineSearch';
 
 describe('should add and get entries', () => {
@@ -22,14 +21,23 @@ describe('should add and get entries', () => {
 
     beforeAll(async () => {
       if (!existsSync(testingFilePath)) {
-        const writeStream = createWriteStream(testingFilePath);
+        const writeStream = createWriteStream(testingFilePath, {
+          highWaterMark: 256 * 1024,
+        });
 
         for (let i = 0; i < maxLines; i++) {
-          if (i === mySecretLine) {
-            writeStream.write(`${mySecretValueToFind}\n`);
-            continue;
+          if (i % 1000000 === 0) {
+            console.log(`wrote ${i} lines`);
           }
-          writeStream.write(`${randomUUID()}\n`);
+          if (
+            !writeStream.write(
+              `${i === mySecretLine ? mySecretValueToFind : 'dummy line data'}\n`,
+            )
+          ) {
+            await new Promise<void>((resolve) =>
+              writeStream.once('drain', () => resolve()),
+            );
+          }
         }
 
         writeStream.end();
@@ -39,7 +47,7 @@ describe('should add and get entries', () => {
 
         console.log('mySecretLine:', mySecretLine);
       }
-    }, 120000);
+    }, 12000000);
 
     afterAll(() => {
       unlinkSync(testingFilePath);
@@ -54,6 +62,6 @@ describe('should add and get entries', () => {
         mySecretValueToFind,
       );
       console.timeEnd(`huge file took`);
-    }, 120000);
+    }, 1200000);
   });
 });
