@@ -11,6 +11,10 @@ export class LineDB {
   }
 
   async search(lineNumber: number): Promise<number | null> {
+    if (!this.hasDbIndexFile()) {
+      throw new Error(`Index file does not exist. ${this.filename}`);
+    }
+
     return new Promise((resolve, reject) => {
       const readStreamConfig = {
         start: lineNumber * FILE_VALUE_SIZE_BYTES,
