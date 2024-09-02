@@ -10,13 +10,21 @@ describe('should add and get entries', () => {
     expect(await lineSearch.search(0)).toEqual('one');
     expect(await lineSearch.search(1)).toEqual('two');
     expect(await lineSearch.search(2)).toEqual('three');
-    expect(await lineSearch.search(3)).toBeNull();
+
+    let error: Error | null = null;
+    try {
+      await lineSearch.search(3);
+    } catch (e) {
+      error = e as Error;
+    }
+
+    expect(error?.message).toEqual('Line 3 not found');
   });
 
   describe('large file', () => {
     const mySecretValueToFind = 'earthIsNotFlat';
     const testingFilePath = `${__dirname}/largeTestingFile.txt`;
-    const maxLines = 1000000;
+    const maxLines = 100000000;
     const mySecretLine = maxLines - 10;
 
     beforeAll(async () => {
@@ -56,7 +64,9 @@ describe('should add and get entries', () => {
     it('should find line with hash table shards', async () => {
       const lineSearch = new LineSearch(testingFilePath);
 
+      console.time(`huge indexing took`);
       await lineSearch.init(true);
+      console.timeEnd(`huge indexing took`);
       console.time(`huge file took`);
       expect(await lineSearch.search(mySecretLine)).toEqual(
         mySecretValueToFind,
